@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const Playground = () => {
   const [circles, setCircles] = useState<any>([]);
