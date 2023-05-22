@@ -1,61 +1,74 @@
-import { styled } from "styled-components";
-import GlobalStyle from "./GlobalStyle";
-import { useEffect, useState } from "react";
+import React, { useState } from 'react';
 
-function App() {
-  
-  const [mouseLocation, setMouseLocation] = useState<any>({ x: 0, y: 0 });
-  // const [divs, setDivs] = useState<any>([]);
-  const mouseMoveHandler = (e: any) => {
-    setMouseLocation({
-      x: e.clientX - e.target.offsetLeft,
-      y: e.clientY - e.target.offsetTop,
-    });
+const Playground = () => {
+  const [circles, setCircles] = useState<any>([]);
+  const [undoneCircles, setUndoneCircles] = useState<any>([]);
+
+  const handlePlaygroundClick = (event:any) => {
+    const { clientX, clientY } = event;
+    const newCircle = {
+      x: clientX,
+      y: clientY,
+      color: getRandomColor(),
+    };
+    setCircles([...circles, newCircle]);
+    setUndoneCircles([]);
   };
 
+  const handleUndo = () => {
+    const lastCircle = circles[circles.length - 1];
+    setCircles(circles.slice(0, -1));
+    setUndoneCircles([...undoneCircles, lastCircle]);
+  };
 
- 
+  const handleRedo = () => {
+    const lastUndoneCircle = undoneCircles[undoneCircles.length - 1];
+    setCircles([...circles, lastUndoneCircle]);
+    setUndoneCircles(undoneCircles.slice(0, -1));
+  };
 
-  const randomCircleHandler = () => {
-    const randomCOlor = '#' + Math.floor(Math.random() * 11177215).toString(16)
-    console.log(randomCOlor)
-  }
-  useEffect(() => {
-    
-    window.addEventListener("mousemove", mouseMoveHandler);
+  const getRandomColor = () => {
+    const colors = ['red', 'blue', 'green', 'yellow', 'orange'];
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
+  };
 
-    return () => {
-      window.removeEventListener("mousemove", mouseMoveHandler);
-    };
-  }, []);
-
-  useEffect(() => {
-    randomCircleHandler();
-  }, [mouseLocation])
-
-
-
-  // console.log(mouseLocation.x, mouseLocation.y);
   return (
-    <>
-      <GlobalStyle />
-      <Div>
-        <button>undo</button>
-        <button>redo</button>
-        Mouse Local Coordinates: x = {mouseLocation.x}, y={mouseLocation.y}
-      </Div>
-    </>
+    <div>
+      <div
+        style={{
+          height: '90vh',
+          width: '100vw',
+          border: '1px solid black',
+          position: 'relative',
+        }}
+        onClick={handlePlaygroundClick}
+      >
+        {circles.map((circle:any, index:any) => (
+          <div
+            key={index}
+            style={{
+              position: 'absolute',
+              top: circle.y,
+              left: circle.x,
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              backgroundColor: circle.color,
+            }}
+          ></div>
+        ))}
+      </div>
+      <div>
+        <button onClick={handleUndo} disabled={circles.length === 0}>
+          Undo
+        </button>
+        <button onClick={handleRedo} disabled={undoneCircles.length === 0}>
+          Redo
+        </button>
+      </div>
+    </div>
   );
-}
+};
 
-export default App;
-const Div = styled.div`
-  width: 100%;
-  height: 100px;
-  border-bottom: 5px solid white;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 50px;
-`;
+export default Playground;
